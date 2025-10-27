@@ -23,15 +23,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-
-# runs when the bot detects a !r message in the channel specified by FETCH_CHANNEL
-@bot.command()
-async def r(ctx):
     target_channel = (bot.get_channel(channel_id) or await bot.fetch_channel(channel_id))
-    if target_channel is None:
-        await ctx.send("Could not find the target channel.")
-        return
-    
     videos = []
 
     # Fetch messages from the channel
@@ -42,11 +34,11 @@ async def r(ctx):
 
     if videos:
         video_url = random.choice(videos)
-        await ctx.send(f'Random video: {video_url}')
+        await target_channel.send(f'Random video: {video_url}')
     else:
-        await ctx.send("No videos found in this channel.")
+        await target_channel.send("No videos found in this channel.")
 
-
+    quit(0)
 
 if __name__ == "__main__":
     bot.run(api_key)
