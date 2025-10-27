@@ -2,11 +2,14 @@ import discord
 import random
 import os
 from discord.ext import commands
+from dotenv import load_dotenv
 
 # discord channel ID that appears in browser URL
 # ex. 123 / 456
 # 2nd part is channel ID
-FETCH_CHANNEL = 123
+load_dotenv()
+channel_id = os.getenv("TEST_CHANNEL")
+api_key = os.getenv("API_KEY")
 
 # Define which intents you want to use
 intents = discord.Intents.default()  # This enables the default intents
@@ -24,8 +27,7 @@ async def on_ready():
 # runs when the bot detects a !r message in the channel specified by FETCH_CHANNEL
 @bot.command()
 async def r(ctx):
-
-    target_channel = bot.get_channel(FETCH_CHANNEL)
+    target_channel = (bot.get_channel(channel_id) or await bot.fetch_channel(channel_id))
     if target_channel is None:
         await ctx.send("Could not find the target channel.")
         return
@@ -44,4 +46,7 @@ async def r(ctx):
     else:
         await ctx.send("No videos found in this channel.")
 
-bot.run("")
+
+
+if __name__ == "__main__":
+    bot.run(api_key)
