@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 # ex. 123 / 456
 # 2nd part is channel ID
 load_dotenv()
-channel_id = os.getenv("TEST_CHANNEL")
+read_channel_id = os.getenv("PROD_READ_CHANNEL")
+post_channel_id = os.getenv("PROD_POST_CHANNEL")
 api_key = os.getenv("API_KEY")
 
 # Define which intents you want to use
@@ -23,20 +24,21 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    target_channel = (bot.get_channel(channel_id) or await bot.fetch_channel(channel_id))
+    read_channel = (bot.get_channel(read_channel_id) or await bot.fetch_channel(read_channel_id))
+    post_channel = (bot.get_channel(post_channel_id) or await bot.fetch_channel(post_channel_id))
     videos = []
 
     # Fetch messages from the channel
-    async for message in target_channel.history(limit=20000):
+    async for message in read_channel.history(limit=100000):
         for attachment in message.attachments:
             if any(attachment.filename.endswith(ext) for ext in ['.mp4', '.webm']):
                 videos.append(attachment.url)
 
     if videos:
         video_url = random.choice(videos)
-        await target_channel.send(f'Random video: {video_url}')
+        await post_channel.send(f'Random video: {video_url}')
     else:
-        await target_channel.send("No videos found in this channel.")
+        await post_channel.send("No videos found in this channel.")
 
     quit(0)
 
