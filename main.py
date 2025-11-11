@@ -11,6 +11,7 @@ load_dotenv()
 read_channel_id = os.getenv("PROD_READ_CHANNEL")
 post_channel_id = os.getenv("PROD_POST_CHANNEL")
 api_key = os.getenv("API_KEY")
+video_count = os.getenv("VIDEO_COUNT")
 
 # Define which intents you want to use
 intents = discord.Intents.default()  # This enables the default intents
@@ -29,16 +30,39 @@ async def on_ready():
     videos = []
 
     # Fetch messages from the channel
-    async for message in read_channel.history(limit=100000):
+    async for message in read_channel.history(limit=15000):
         for attachment in message.attachments:
             if any(attachment.filename.endswith(ext) for ext in ['.mp4', '.webm']):
                 videos.append(attachment.url)
 
+    # check cache
+    with open("cache.txt", "r") as file:    
+        lines = file.read().splitlines()
+        line_count = len(lines)
+
+    # purge cache if necessary
+    if line_count >= int(video_count):
+        with open("cache.txt", "w"):
+            pass
+
     if videos:
-        video_url = random.choice(videos)
+
+        fetch_count = 0
+        fetch_max = 5                               # to avoid infinite loops
+        while fetch_count < fetch_max:
+            video_url = random.choice(videos)       # fetch url
+
+            if video_url in lines:                  # if cache contains
+                video_url = random.choice(videos)   # get another
+                fetch_count += 1
+            else:                                   # otherwise, write url to cache
+                with open("cache.txt", "a") as file:
+                    file.write(video_url + "\n")
+                break
+
         await post_channel.send(f'Random video: {video_url}')
     else:
-        await post_channel.send("No videos found in this channel.")
+        await post_channel.send("Somebody fix the damn bot bruh, acc tweaking.")
 
     quit(0)
 
