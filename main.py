@@ -12,6 +12,7 @@ read_channel_id = os.getenv("PROD_READ_CHANNEL")
 post_channel_id = os.getenv("PROD_POST_CHANNEL")
 api_key = os.getenv("API_KEY")
 video_count = os.getenv("VIDEO_COUNT")
+cache_location = os.getenv("CACHE_LOCATION")
 
 # Define which intents you want to use
 intents = discord.Intents.default()  # This enables the default intents
@@ -36,13 +37,13 @@ async def on_ready():
                 videos.append(attachment.url)
 
     # check cache
-    with open("cache.txt", "r") as file:    
+    with open(cache_location, "r") as file:    
         lines = file.read().splitlines()
         line_count = len(lines)
 
     # purge cache if necessary
     if line_count >= int(video_count):
-        with open("cache.txt", "w"):
+        with open(cache_location, "w"):
             pass
 
     if videos:
@@ -56,7 +57,7 @@ async def on_ready():
                 video_url = random.choice(videos)   # get another
                 fetch_count += 1
             else:                                   # otherwise, write url to cache
-                with open("cache.txt", "a") as file:
+                with open(cache_location, "a") as file:
                     file.write(video_url + "\n")
                 break
 
